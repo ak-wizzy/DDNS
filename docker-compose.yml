@@ -17,5 +17,5 @@ services:
       - pilot-network
 
 networks:
-  proxy_net:
+  pilot-network:
     external: true
