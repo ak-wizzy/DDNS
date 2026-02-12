@@ -14,7 +14,7 @@ services:
       - TTL=${CF_TTL:-1}
 
     networks:
-      - ddns_net
+      - pilot-network
 
 networks:
   ddns_net:
