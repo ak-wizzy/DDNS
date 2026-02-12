@@ -17,5 +17,5 @@ services:
       - pilot-network
 
 networks:
-  ddns_net:
-    driver: bridge
+  proxy_net:
+    external: true
