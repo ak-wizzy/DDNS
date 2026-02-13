@@ -5,7 +5,7 @@ set -e
 # --- Logging setup ---
 LOG_FILE="/logs/ddns.log"
 mkdir -p /logs
-exec >> "$LOG_FILE" 2>&1
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "--------------------------------------------------"
 echo "$(date -u) Container started"
