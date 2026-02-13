@@ -12,6 +12,8 @@ services:
       - CF_TTL=${CF_TTL:-1}
       - CF_PROXY=${CF_PROXY:-false}
       - TZ=Europe/London
+    volumes:
+      - ./logs:/logs
     networks:
       - pilot-network
 
