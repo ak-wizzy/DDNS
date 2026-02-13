@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: unless-stopped
+
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
+      - ZONE=${CF_ZONE}
+      - SUBDOMAIN=${CF_SUBDOMAIN}
+      - PROXIED=${CF_PROXIED:-false}
+      - TTL=${CF_TTL:-1}
+
+    networks:
+      - pilot-network
+
+networks:
+  pilot-network:
+    external: true
