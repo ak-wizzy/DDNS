@@ -1,102 +1,79 @@
 =======================================================================
-🌐 Docker Cloudflare DDNS
+🌐 Cloudflare DDNS – Custom Docker Implementation
 =======================================================================
-A lightweight Docker-based Dynamic DNS (DDNS) solution using Cloudflare.
-This service automatically updates a Cloudflare DNS A record whenever your public IP address changes.
+Overview
+This service maintains a stable DNS A record in Cloudflare for environments with dynamic public IP addresses.
+It runs as a lightweight Docker container and automatically updates a specified Cloudflare DNS record when the public IPv4 address changes.
+This implementation replaces third-party DDNS images with a custom, minimal Alpine-based container for better transparency, control, and stability.
 
-🚀 Why This Exists
-Many home labs and self-hosted environments:
-    • Sit behind residential ISPs
-    • Receive dynamic (changing) public IP addresses
-    • Need a stable domain name for remote access
-This container solves that by:
-    • Detecting the current public IP
-    • Updating Cloudflare DNS automatically
-    • Keeping your domain pointing to the correct IP
+Purpose
+Residential ISPs typically assign dynamic public IP addresses. When the IP changes, external access to home lab services breaks.
+This service ensures:
+    • The configured Cloudflare A record always reflects the current public IP.
+    • No manual DNS updates are required.
+    • Infrastructure remains reachable via domain name.
 
-🧠 Mental Model
-    DDNS is the map.
-    It tells the internet where your network lives.
-It does not:
-    • Expose services
-    • Handle routing
-    • Open firewall ports
-It only updates DNS records.
+Architecture Context
+Mental Model
+    • DDNS = The map
+    • Reverse proxy = The receptionist
+    • Firewall/router = The gate
+DDNS only updates DNS records.
+It does not expose services or manage routing.
 
-🏗️ Requirements
+Technical Summary
+    • Runs in Docker
+    • Polls public IPv4 every 5 minutes
+    • Compares against current Cloudflare record
+    • Updates record only if IP has changed
+    • Uses Cloudflare API Token (scoped permissions)
+    • Logs to Docker stdout and persistent log volume
+
+Dependencies
     • Docker Engine
-    • A Cloudflare account
-    • A registered domain managed in Cloudflare
+    • Cloudflare-managed domain
+    • Scoped Cloudflare API Token (DNS Edit + Zone Read)
 
-🔑 Cloudflare API Token Setup
-Create a Custom API Token in Cloudflare:
-Permissions
-    • Zone → DNS → Edit
-Zone Resources
-    • Include → Specific zone → yourdomain.com
-Do not use the Global API Key.
+Configuration Parameters
+Variable	Description
+CF_API_TOKEN	Cloudflare API Token
+CF_ZONE	Root domain (example.com)
+CF_RECORD	Subdomain (e.g., lab)
+CF_TTL	DNS TTL (1 = Auto)
+CF_PROXY	Cloudflare proxy enabled (true/false)
 
-📝 Summary
-This setup provides:
-    • Stable domain name
-    • Automatic IP updates
-    • Zero manual DNS maintenance
-    • Minimal resource usage
-    • Simple deployment
-    
-It is ideal for:
-    • Home labs
-    • Self-hosted services
-    • Remote access setups
-    • Small-scale infrastructure
+Logging
+Logs are available via:
+    • Docker logs
+    • Portainer
+    • Persistent /logs/ddns.log (if volume mounted)
+Logs include timestamps for:
+    • Container startup
+    • IP detection
+    • DNS lookup
+    • Record updates
+    • Error conditions
 
-📜 Logging
-This container logs to:
-    • Docker stdout (visible in docker logs)
-    • /logs/ddns.log (if volume is mounted)
-This means:
-    • You can monitor it via Portainer
-    • Logs persist across container restarts (if volume mounted)
-🔄 How It Works Internally
-Every 5 minutes:
-    1. Fetch public IP via ipify
-    2. Retrieve Zone ID from Cloudflare
-    3. Retrieve DNS record ID
-    4. Compare stored IP vs detected IP
-    5. Update only if changed
-No unnecessary API calls.
-No constant rewrites.
-Minimal noise.
+Operational Notes
+    • Only IPv4 is supported in current build.
+    • Poll interval is fixed at 5 minutes.
+    • No automatic alerting is implemented.
+    • Designed for single A record management.
 
-🧩 Why Build Custom Instead of Using a Public Image?
-Pros of Custom Build
-    • Full control
-    • No dependency on external maintainers
-    • No surprise breaking changes
-    • Easier debugging
-    • Transparent logic
-    • Minimal attack surface
-Cons
-    • You maintain it
-    • You must monitor API changes
-    • No automatic feature updates
-If you want maximum stability and clarity, custom wins.
-If you want convenience and community maintenance, prebuilt images are fine — until they break unexpectedly.
+Known Limitations
+    • No IPv6 support
+    • No notification integration
+    • Relies on Cloudflare API stability
+    • Single-record scope
 
-🛠️ Use Cases
-Ideal for:
-    • Home labs
-    • Reverse proxy setups
-    • Self-hosted apps
-    • VPN endpoints
-    • Remote SSH access
-    • Small infrastructure environments
+When to Use
+Recommended for:
+    • Home lab environments
+    • Self-hosted applications
+    • Reverse proxy deployments
+    • Small infrastructure setups
 
-📝 Summary
-This setup provides:
-    • Stable domain name
-    • Automatic IP updates
-    • Zero manual DNS maintenance
-    • Lightweight resource usage
-    • Transparent logic
-    • Simple deployment
+Change History
+    • Replaced third-party DDNS image with custom Alpine build
+    • Implemented persistent logging
+    • Standardized on Cloudflare API Token authentication
