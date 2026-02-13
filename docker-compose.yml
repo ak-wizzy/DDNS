@@ -2,17 +2,16 @@ version: "3.9"
 
 services:
   cloudflare-ddns:
-    image: oznu/cloudflare-ddns:latest
-    container_name: cloudflare-ddns
+    build: .
+    container_name: aktechno-ddns
     restart: unless-stopped
-
     environment:
-      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
-      - ZONE=${CF_ZONE}
-      - SUBDOMAIN=${CF_SUBDOMAIN}
-      - PROXIED=${CF_PROXIED:-false}
-      - TTL=${CF_TTL:-1}
-
+      - CF_API_TOKEN=${CF_API_TOKEN}
+      - CF_ZONE=${CF_ZONE}
+      - CF_RECORD=${CF_RECORD}
+      - CF_TTL=${CF_TTL:-1}
+      - CF_PROXY=${CF_PROXY:-false}
+      - TZ=Europe/London
     networks:
       - pilot-network
 
